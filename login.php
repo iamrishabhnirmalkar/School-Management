@@ -1,90 +1,90 @@
 <?php
-// Start session
 session_start();
-// If already logged in, redirect to dashboard
-if (isset($_SESSION['role'])) {
-    header('Location: ' . $_SESSION['role'] . '/dashboard.php');
-    exit();
-}
+require_once 'config.php';
 
-// Handle login POST
+$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $userid = trim($_POST['userid']);
-    require_once 'db.php';
-    $found = false;
-    // Check Admins
-    $stmt = $conn->prepare('SELECT id, username, name FROM admins WHERE username = ?');
-    $stmt->bind_param('s', $userid);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $_SESSION['role'] = 'admin';
-        $_SESSION['user_id'] = $row['id'];
-        $_SESSION['name'] = $row['name'];
-        header('Location: admin/dashboard.php');
-        exit();
+    $login_id = trim($_POST['login_id']);
+
+    if (empty($login_id)) {
+        $error = "Login ID is required!";
+    } else {
+        $stmt = $conn->prepare("SELECT * FROM users WHERE login_id = ?");
+        $stmt->bind_param("s", $login_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+
+        if ($user) {
+            $_SESSION['user'] = $user;
+            switch ($user['role']) {
+                case 'admin':
+                    header("Location: admin/dashboard.php");
+                    break;
+                case 'teacher':
+                    header("Location: teacher/dashboard.php");
+                    break;
+                case 'student':
+                    header("Location: student/dashboard.php");
+                    break;
+            }
+            exit;
+        } else {
+            $error = "Invalid Login ID!";
+        }
     }
-    $stmt->close();
-    // Check Students
-    $stmt = $conn->prepare('SELECT id, student_id, name FROM students WHERE student_id = ?');
-    $stmt->bind_param('s', $userid);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $_SESSION['role'] = 'student';
-        $_SESSION['user_id'] = $row['id'];
-        $_SESSION['name'] = $row['name'];
-        header('Location: student/dashboard.php');
-        exit();
-    }
-    $stmt->close();
-    // Check Teachers
-    $stmt = $conn->prepare('SELECT id, teacher_id, name FROM teachers WHERE teacher_id = ?');
-    $stmt->bind_param('s', $userid);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    if ($row = $result->fetch_assoc()) {
-        $_SESSION['role'] = 'teacher';
-        $_SESSION['user_id'] = $row['id'];
-        $_SESSION['name'] = $row['name'];
-        header('Location: teacher/dashboard.php');
-        exit();
-    }
-    $stmt->close();
-    $conn->close();
-    $_SESSION['login_error'] = 'User not found!';
-    header('Location: login.php');
-    exit();
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
+    <title>Login - School Portal</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School ERP Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background: url('assets/img/bg-school.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        .login-box {
+            background-color: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(5px);
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-blue-100 to-blue-300 min-h-screen flex items-center justify-center">
-    <div class="w-full max-w-md mx-auto bg-white rounded-xl shadow-lg p-8 flex flex-col items-center">
-        <div class="w-16 h-16 mb-4">
-            <img src="assets/school-logo.svg" alt="School Logo" class="w-full h-full object-contain"/>
+
+<body class="min-h-screen flex items-center justify-center">
+    <div class="login-box w-full max-w-md shadow-lg rounded-xl p-8">
+        <div class="text-center mb-6">
+            <img src="assets/img/logo/logo.png" alt="School Logo" class="w-24 mx-auto mb-4">
+            <h2 class="text-2xl font-semibold text-gray-700">School Portal Login</h2>
+            <p class="text-gray-500 mt-2">Enter your ID to access the system</p>
         </div>
-        <h2 class="text-2xl font-bold mb-2 text-blue-800">School ERP Login</h2>
-        <p class="mb-4 text-gray-500">Sign in to your account</p>
-        <?php if (isset($_SESSION['login_error'])): ?>
-            <div class="mb-4 text-red-600 text-center w-full">
-                <?php echo $_SESSION['login_error']; unset($_SESSION['login_error']); ?>
+
+        <?php if (!empty($error)): ?>
+            <div class="bg-red-100 text-red-600 text-sm px-4 py-2 rounded mb-4">
+                <?= htmlspecialchars($error) ?>
             </div>
         <?php endif; ?>
-        <form action="login.php" method="POST" class="space-y-4 w-full">
+
+        <form method="POST" class="space-y-4">
             <div>
-                <label for="userid" class="block mb-1 font-medium text-gray-700">Username / ID</label>
-                <input type="text" name="userid" id="userid" required class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400" placeholder="Enter your username or ID">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Login ID</label>
+                <input type="text" name="login_id" placeholder="Enter your ID"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required>
             </div>
-            <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors font-semibold shadow">Login</button>
+
+            <button type="submit"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition transform hover:scale-105">
+                Login
+            </button>
         </form>
-        <a href="index.php" class="mt-6 text-blue-500 hover:underline text-sm">&larr; Back to Home</a>
     </div>
 </body>
+
 </html>
