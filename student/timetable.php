@@ -11,6 +11,23 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'student') {
 $student_id = $_SESSION['user']['id'];
 $class_id = $_SESSION['user']['class_id'] ?? null;
 
+// Fetch time slots from database
+$time_slots_result = $conn->query("SELECT id, start_time, end_time, label FROM time_slots ORDER BY start_time ASC");
+$time_slots = [];
+$time_slots_data = [];
+while ($row = $time_slots_result->fetch_assoc()) {
+    $time_range = date('H:i', strtotime($row['start_time'])) . '-' . date('H:i', strtotime($row['end_time']));
+    $display_label = $row['label'] ? $row['label'] . ' (' . $time_range . ')' : $time_range;
+    $time_slots[] = $display_label;
+    $time_slots_data[] = [
+        'id' => $row['id'],
+        'start_time' => $row['start_time'],
+        'end_time' => $row['end_time'],
+        'label' => $row['label'],
+        'display' => $display_label
+    ];
+}
+
 // Get timetable
 $timetable = [];
 if ($class_id) {
@@ -45,7 +62,7 @@ $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                 <img src="../assets/img/logo/logo.png" alt="Logo" class="w-10 h-10">
                 <div>
                     <h1 class="text-xl font-bold">School ERP</h1>
-                    <p class="text-green-200">Student Marks</p>
+                    <p class="text-green-200">Student Timetable</p>
                 </div>
             </div>
             <div class="flex items-center space-x-4">
@@ -80,11 +97,10 @@ $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            <!-- Generate time slots from 8:00 AM to 3:00 PM -->
-                            <?php for ($hour = 8; $hour <= 15; $hour++): ?>
+                            <?php foreach ($time_slots_data as $slot_data): ?>
                                 <tr>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        <?= sprintf("%02d:00 - %02d:00", $hour, $hour+1) ?>
+                                        <?= htmlspecialchars($slot_data['display']) ?>
                                     </td>
                                     <?php foreach ($days as $day): ?>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -92,8 +108,7 @@ $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                                             $found = false;
                                             if (isset($timetable[$day])) {
                                                 foreach ($timetable[$day] as $slot) {
-                                                    $start = date('H', strtotime($slot['start_time']));
-                                                    if ($start == $hour) {
+                                                    if ($slot['start_time'] == $slot_data['start_time'] && $slot['end_time'] == $slot_data['end_time']) {
                                                         echo htmlspecialchars($slot['subject_name']) . '<br>';
                                                         echo '<small class="text-gray-400">'
                                                             . htmlspecialchars($slot['teacher_name']) . '</small>';
@@ -107,7 +122,7 @@ $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
                                         </td>
                                     <?php endforeach; ?>
                                 </tr>
-                            <?php endfor; ?>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>

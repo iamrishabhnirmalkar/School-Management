@@ -10,15 +10,23 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'teacher') {
 
 $teacher_id = $_SESSION['user']['id'];
 
-// Define time slots
-$time_slots = [
-    '08:00-09:00',
-    '09:00-10:00',
-    '10:00-11:00',
-    '11:00-12:00',
-    '12:00-13:00',
-    '13:00-14:00'
-];
+// Fetch time slots from the database
+$time_slots_result = $conn->query("SELECT id, start_time, end_time, label FROM time_slots ORDER BY start_time ASC");
+$time_slots = [];
+$time_slots_data = [];
+while ($row = $time_slots_result->fetch_assoc()) {
+    $time_range = date('H:i', strtotime($row['start_time'])) . '-' . date('H:i', strtotime($row['end_time']));
+    $display_label = $row['label'] ? $row['label'] . ' (' . $time_range . ')' : $time_range;
+    $time_slots[] = $display_label;
+    $time_slots_data[] = [
+        'id' => $row['id'],
+        'start_time' => $row['start_time'],
+        'end_time' => $row['end_time'],
+        'label' => $row['label'],
+        'display' => $display_label
+    ];
+}
+
 $days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 // Fetch timetable entries for this teacher
@@ -27,14 +35,31 @@ $timetable_entries = $conn->query("SELECT t.*, c.class_name, c.section, s.subjec
 // Organize timetable by day and time slot
 $timetable = [];
 foreach ($timetable_entries as $entry) {
-    $slot = substr($entry['start_time'], 0, 5) . '-' . substr($entry['end_time'], 0, 5);
-    $timetable[$entry['day_of_week']][$slot] = [
-        'subject' => $entry['subject_name'],
-        'class_name' => $entry['class_name'] . ($entry['section'] ? ' ' . $entry['section'] : ''),
-        'room_number' => $entry['room_number']
-    ];
+    // Find matching time slot
+    $entry_start = $entry['start_time'];
+    $entry_end = $entry['end_time'];
+    
+    foreach ($time_slots_data as $slot_data) {
+        if ($slot_data['start_time'] == $entry_start && $slot_data['end_time'] == $entry_end) {
+            $slot_key = $slot_data['display'];
+            $timetable[$entry['day_of_week']][$slot_key] = [
+                'subject' => $entry['subject_name'],
+                'class_name' => $entry['class_name'] . ($entry['section'] ? ' ' . $entry['section'] : ''),
+                'room_number' => $entry['room_number']
+            ];
+            break;
+        }
+    }
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Teacher Timetable</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
 <!-- Header same as dashboard -->
 <header class="bg-blue-700 text-white shadow-md">
     <div class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -95,3 +120,5 @@ foreach ($timetable_entries as $entry) {
         </div>
     </div>
 </main>
+</body>
+</html>

@@ -22,16 +22,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $subject_id = $_POST['subject_id'];
     $teacher_id = $_POST['teacher_id'];
     $day_of_week = $_POST['day_of_week'];
-    $start_time = $_POST['start_time'];
-    $end_time = $_POST['end_time'];
+    $time_slot_id = $_POST['time_slot_id'];
     $room_number = $_POST['room_number'];
 
-    $stmt = $conn->prepare("INSERT INTO timetable (class_id, subject_id, teacher_id, day_of_week, start_time, end_time, room_number) VALUES (?, ?, ?, ?, ?, ?, ?)");
-    $stmt->bind_param("iiissss", $class_id, $subject_id, $teacher_id, $day_of_week, $start_time, $end_time, $room_number);
-    $stmt->execute();
+    // Get time slot details
+    $time_slot_result = $conn->query("SELECT start_time, end_time FROM time_slots WHERE id = $time_slot_id");
+    $time_slot = $time_slot_result->fetch_assoc();
+    
+    if ($time_slot) {
+        $start_time = $time_slot['start_time'];
+        $end_time = $time_slot['end_time'];
+
+        $stmt = $conn->prepare("INSERT INTO timetable (class_id, subject_id, teacher_id, day_of_week, start_time, end_time, room_number) VALUES (?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("iiissss", $class_id, $subject_id, $teacher_id, $day_of_week, $start_time, $end_time, $room_number);
+        $stmt->execute();
+    }
+    
     header("Location: index.php");
     exit;
 }
+
+// Fetch time slots from database
+$time_slots = $conn->query("SELECT id, start_time, end_time, label FROM time_slots ORDER BY start_time ASC")->fetch_all(MYSQLI_ASSOC);
 
 // Fetch classes, subjects, teachers for dropdowns
 $classes = $conn->query("SELECT id, class_name, section FROM classes ORDER BY class_name, section")->fetch_all(MYSQLI_ASSOC);
@@ -70,7 +82,12 @@ $timetable = $conn->query("SELECT t.*, c.class_name, c.section, s.subject_name, 
     </header>
     <div class="container mx-auto px-6 py-8">
         <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-            <h2 class="text-xl font-bold mb-4 text-gray-800">Add Timetable Entry</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-gray-800">Add Timetable Entry</h2>
+                <a href="time_slots.php" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md">
+                    <i class="fas fa-clock mr-1"></i>Manage Time Slots
+                </a>
+            </div>
             <form method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Class *</label>
@@ -115,12 +132,23 @@ $timetable = $conn->query("SELECT t.*, c.class_name, c.section, s.subject_name, 
                     </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Time *</label>
-                    <input type="time" name="start_time" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Time Slot *</label>
+                    <select name="time_slot_id" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        <option value="">Select Time Slot</option>
+                        <?php foreach ($time_slots as $slot): ?>
+                            <option value="<?= $slot['id'] ?>" data-start="<?= $slot['start_time'] ?>" data-end="<?= $slot['end_time'] ?>">
+                                <?= htmlspecialchars($slot['label']) ?> (<?= date('H:i', strtotime($slot['start_time'])) ?> - <?= date('H:i', strtotime($slot['end_time'])) ?>)
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">End Time *</label>
-                    <input type="time" name="end_time" required class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                    <input type="time" name="start_time" id="start_time" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                    <input type="time" name="end_time" id="end_time" readonly class="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Room Number</label>
@@ -171,5 +199,17 @@ $timetable = $conn->query("SELECT t.*, c.class_name, c.section, s.subject_name, 
             </div>
         </div>
     </div>
+    
+    <script>
+        // Auto-fill start and end time when time slot is selected
+        document.querySelector('select[name="time_slot_id"]').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const startTime = selectedOption.getAttribute('data-start');
+            const endTime = selectedOption.getAttribute('data-end');
+            
+            document.getElementById('start_time').value = startTime;
+            document.getElementById('end_time').value = endTime;
+        });
+    </script>
 </body>
 </html>

@@ -63,7 +63,7 @@ $submissions = array_fill(0, $submitted, [
         </div>
     </header>
     <main class="container mx-auto px-6 py-8">
-        <div class="bg-white rounded-lg shadow-md p-6 max-w-2xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg rounded-2xl p-6 max-w-2xl mx-auto">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-2xl font-bold text-gray-800"><?= htmlspecialchars($hw['title']) ?></h2>
                 <button onclick="window.print()" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm">

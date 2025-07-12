@@ -79,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </header>
     <main class="container mx-auto px-6 py-8">
-        <div class="bg-white rounded-lg shadow-md p-6 max-w-xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg rounded-2xl p-6 max-w-2xl mx-auto">
             <h2 class="text-xl font-bold mb-4 text-gray-800">Assign New Homework</h2>
             <?php if ($error): ?>
                 <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4">
