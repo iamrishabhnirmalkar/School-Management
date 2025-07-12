@@ -16,12 +16,7 @@ $sort = $_GET['sort'] ?? 'admission_number';
 $order = $_GET['order'] ?? 'ASC';
 
 // Base query
-$query = "SELECT u.id, u.admission_number, u.full_name, u.email, u.phone, 
-          c.class_name, c.section, s.roll_number, s.admission_date, s.status
-          FROM users u
-          JOIN students s ON u.id = s.user_id
-          LEFT JOIN classes c ON s.class_id = c.id
-          WHERE u.role = 'student'";
+$query = "SELECT u.id, u.admission_number, u.full_name, u.email, u.phone, c.class_name, c.section, s.roll_number, s.admission_date, s.status, s.photo, ba.id as bus_allocation_id, b.bus_number, b.route_name, ba.stop_name FROM users u JOIN students s ON u.id = s.user_id LEFT JOIN classes c ON s.class_id = c.id LEFT JOIN bus_allocations ba ON s.bus_allocation_id = ba.id LEFT JOIN buses b ON ba.bus_id = b.id WHERE u.role = 'student'";
 
 // Add filters
 if (!empty($search)) {
@@ -62,77 +57,11 @@ if (isset($_GET['export'])) {
     }
     exit;
 }
+
+$pageTitle = 'Student Management';
+$activePage = 'students';
+include '../_layout.php';
 ?>
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Management - School ERP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-
-<body class="bg-gray-50">
-    <!-- Header (same as dashboard) -->
-    <header class="bg-blue-700 text-white shadow-md">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-4">
-                    <img src="../../assets/img/logo/logo.png" alt="Logo" class="w-10 h-10">
-                    <div>
-                        <h1 class="text-2xl font-bold">School ERP System</h1>
-                        <p class="text-blue-200">Student Management</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative group">
-                        <div class="flex items-center space-x-2 cursor-pointer">
-                            <img src="../../assets/img/admin-avatar.jpg" alt="Admin" class="w-8 h-8 rounded-full border-2 border-white">
-                            <span><?= htmlspecialchars($_SESSION['user']['full_name']) ?></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container mx-auto px-6 py-8 flex">
-        <!-- Sidebar Navigation (same as dashboard) -->
-        <aside class="w-64 flex-shrink-0">
-            <nav class="bg-white rounded-lg shadow-md p-4 sticky top-4">
-                <ul class="space-y-2">
-                    <li>
-                        <a href="../../admin/dashboard.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50 text-blue-700">
-                            <i class="fas fa-arrow-left w-5"></i>
-                            <span>Back to Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="index.php" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 text-blue-700">
-                            <i class="fas fa-list w-5"></i>
-                            <span>Student List</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="create.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50">
-                            <i class="fas fa-user-plus w-5"></i>
-                            <span>Add New Student</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="import.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50">
-                            <i class="fas fa-file-import w-5"></i>
-                            <span>Bulk Import</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
         <!-- Main Content Area -->
         <main class="flex-1 ml-8">
             <div class="bg-white rounded-lg shadow-md p-6">
@@ -188,6 +117,7 @@ if (isset($_GET['export'])) {
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photo</th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     <a href="?<?= http_build_query(array_merge($_GET, ['sort' => 'admission_number', 'order' => $sort == 'admission_number' && $order == 'ASC' ? 'DESC' : 'ASC'])) ?>">
                                         Admission No.
@@ -222,6 +152,9 @@ if (isset($_GET['export'])) {
                                     Roll No.
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Bus Info
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Status
                                 </th>
                                 <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -232,11 +165,20 @@ if (isset($_GET['export'])) {
                         <tbody class="bg-white divide-y divide-gray-200">
                             <?php if (empty($students)): ?>
                                 <tr>
-                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500">No students found</td>
+                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500">No students found</td>
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($students as $student): ?>
                                     <tr class="hover:bg-gray-50">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <?php if (!empty($student['photo'])): ?>
+                                                <img src="../../<?= htmlspecialchars($student['photo']) ?>" alt="Photo" class="w-10 h-10 rounded-full object-cover border">
+                                            <?php else: ?>
+                                                <span class="inline-block w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                                                    <i class="fas fa-user"></i>
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <div class="text-sm font-medium text-blue-600"><?= htmlspecialchars($student['admission_number'] ?? '') ?></div>
                                         </td>
@@ -250,6 +192,15 @@ if (isset($_GET['export'])) {
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             <?= htmlspecialchars($student['roll_number'] ?? '') ?>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <?php if (!empty($student['bus_allocation_id'])): ?>
+                                                <span class="block font-medium">Bus: <?= htmlspecialchars($student['bus_number']) ?></span>
+                                                <span class="block text-xs text-gray-500">Route: <?= htmlspecialchars($student['route_name']) ?></span>
+                                                <span class="block text-xs text-gray-500">Stop: <?= htmlspecialchars($student['stop_name']) ?></span>
+                                            <?php else: ?>
+                                                <span class="text-xs text-gray-400">No Bus</span>
+                                            <?php endif; ?>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <?php

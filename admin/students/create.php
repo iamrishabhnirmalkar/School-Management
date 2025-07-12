@@ -16,6 +16,9 @@ $new_admission_number = 'ADM' . str_pad($last_number + 1, 5, '0', STR_PAD_LEFT);
 // Get classes for dropdown
 $classes = $conn->query("SELECT id, class_name, section FROM classes")->fetch_all(MYSQLI_ASSOC);
 
+// Get available buses for dropdown
+$buses = $conn->query("SELECT id, bus_number, route_name FROM buses")->fetch_all(MYSQLI_ASSOC);
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $admission_number = $_POST['admission_number'] ?? $new_admission_number; // Use form value if provided
@@ -31,6 +34,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $parent_phone = $_POST['parent_phone'];
     $address = $_POST['address'];
     $dob = $_POST['dob'];
+    $bus_id = $_POST['bus_id'] ?? null;
+    $stop_name = $_POST['stop_name'] ?? '';
+    $pickup_time = $_POST['pickup_time'] ?? '';
+    $drop_time = $_POST['drop_time'] ?? '';
+    // Handle photo upload
+    $photo_path = null;
+    if (isset($_FILES['photo']) && $_FILES['photo']['error'] === UPLOAD_ERR_OK) {
+        $ext = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
+        $photo_name = 'student_' . time() . '_' . rand(1000,9999) . '.' . $ext;
+        $upload_dir = '../../uploads/student_photos/';
+        if (!is_dir($upload_dir)) mkdir($upload_dir, 0777, true);
+        $target = $upload_dir . $photo_name;
+        if (move_uploaded_file($_FILES['photo']['tmp_name'], $target)) {
+            $photo_path = 'uploads/student_photos/' . $photo_name;
+        }
+    }
 
     // Start transaction
     $conn->begin_transaction();
@@ -42,10 +61,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute();
         $user_id = $stmt->insert_id;
 
-        // Insert into students table
-        $stmt = $conn->prepare("INSERT INTO students (user_id, class_id, roll_number, admission_date, gender, blood_group, parent_name, parent_phone, address, dob) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("iissssssss", $user_id, $class_id, $roll_number, $admission_date, $gender, $blood_group, $parent_name, $parent_phone, $address, $dob);
+        // Insert into students table (without bus_allocation_id initially)
+        $stmt = $conn->prepare("INSERT INTO students (user_id, class_id, roll_number, admission_date, gender, blood_group, parent_name, parent_phone, address, dob, photo) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("iisssssssss", $user_id, $class_id, $roll_number, $admission_date, $gender, $blood_group, $parent_name, $parent_phone, $address, $dob, $photo_path);
         $stmt->execute();
+
+        // If bus is selected, create bus allocation
+        if (!empty($bus_id) && !empty($stop_name)) {
+            $stmt = $conn->prepare("INSERT INTO bus_allocations (bus_id, student_id, stop_name, pickup_time, drop_time, monthly_fee, payment_status, academic_year) VALUES (?, ?, ?, ?, ?, ?, 'unpaid', '2024-2025')");
+            $monthly_fee = 1500.00; // Default fee
+            $stmt->bind_param("iisssd", $bus_id, $user_id, $stop_name, $pickup_time, $drop_time, $monthly_fee);
+            $stmt->execute();
+            $bus_allocation_id = $stmt->insert_id;
+            
+            // Update student with bus_allocation_id
+            $stmt = $conn->prepare("UPDATE students SET bus_allocation_id = ? WHERE user_id = ?");
+            $stmt->bind_param("ii", $bus_allocation_id, $user_id);
+            $stmt->execute();
+        }
 
         $conn->commit();
         $_SESSION['success'] = "Student added successfully!";
@@ -58,69 +91,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Student - School ERP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-
-<body class="bg-gray-50">
-    <!-- Header (same as dashboard) -->
-    <header class="bg-blue-700 text-white shadow-md">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-4">
-                    <img src="../../assets/img/logo/logo.png" alt="Logo" class="w-10 h-10">
-                    <div>
-                        <h1 class="text-2xl font-bold">School ERP System</h1>
-                        <p class="text-blue-200">Add New Student</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative group">
-                        <div class="flex items-center space-x-2 cursor-pointer">
-                            <img src="../../assets/img/admin-avatar.jpg" alt="Admin" class="w-8 h-8 rounded-full border-2 border-white">
-                            <span><?= htmlspecialchars($_SESSION['user']['full_name']) ?></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container mx-auto px-6 py-8 flex">
-        <!-- Sidebar Navigation (same as dashboard) -->
-        <aside class="w-64 flex-shrink-0">
-            <nav class="bg-white rounded-lg shadow-md p-4 sticky top-4">
-                <ul class="space-y-2">
-                    <li>
-                        <a href="../../admin/dashboard.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50 text-blue-700">
-                            <i class="fas fa-arrow-left w-5"></i>
-                            <span>Back to Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="index.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50">
-                            <i class="fas fa-list w-5"></i>
-                            <span>Student List</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="create.php" class="flex items-center space-x-3 p-3 rounded-lg bg-blue-50 text-blue-700">
-                            <i class="fas fa-user-plus w-5"></i>
-                            <span>Add New Student</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
+<?php
+$pageTitle = 'Add New Student';
+$activePage = 'students';
+include '../_layout.php';
+?>
         <!-- Main Content Area -->
         <main class="flex-1 ml-8">
             <div class="bg-white rounded-lg shadow-md p-6">
@@ -132,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <form method="POST" enctype="multipart/form-data" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Student Information -->
                     <div class="space-y-4">
                         <h3 class="text-lg font-medium text-gray-900 border-b pb-2">Student Information</h3>
@@ -175,6 +150,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <option value="O-">O-</option>
                             </select>
                         </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Photo</label>
+                            <input type="file" name="photo" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        </div>
                     </div>
 
                     <!-- Academic Information -->
@@ -201,6 +181,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Admission Date</label>
                             <input type="date" name="admission_date" value="<?= date('Y-m-d') ?>" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Bus Assignment (if student uses school bus)</label>
+                            <div class="space-y-3">
+                                <div>
+                                    <select name="bus_id" class="w-full px-3 py-2 border border-gray-300 rounded-md" onchange="toggleBusDetails()">
+                                        <option value="">No Bus</option>
+                                        <?php foreach ($buses as $bus): ?>
+                                            <option value="<?= $bus['id'] ?>">
+                                                <?= htmlspecialchars($bus['bus_number']) ?> (<?= htmlspecialchars($bus['route_name']) ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div id="bus_details" class="hidden space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Stop Name</label>
+                                        <input type="text" name="stop_name" class="w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., Central Station">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Pickup Time</label>
+                                            <input type="time" name="pickup_time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">Drop Time</label>
+                                            <input type="time" name="drop_time" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -251,6 +263,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
         </main>
     </div>
+    <script>
+        function toggleBusDetails() {
+            const busSelect = document.querySelector('select[name="bus_id"]');
+            const busDetails = document.getElementById('bus_details');
+            
+            if (busSelect.value) {
+                busDetails.classList.remove('hidden');
+            } else {
+                busDetails.classList.add('hidden');
+            }
+        }
+    </script>
 </body>
 
 </html>

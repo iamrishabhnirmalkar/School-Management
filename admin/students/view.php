@@ -16,8 +16,9 @@ $student = $conn->query("
     SELECT 
         u.id, u.admission_number, u.full_name, u.email, u.phone, u.created_at,
         s.roll_number, s.admission_date, s.gender, s.blood_group, 
-        s.parent_name, s.parent_phone, s.address, s.dob, s.status,
+        s.parent_name, s.parent_phone, s.address, s.dob, s.status, s.photo,
         c.class_name, c.section,
+        ba.id as bus_allocation_id, b.bus_number, b.route_name, ba.stop_name,
         (SELECT COUNT(*) FROM attendance WHERE student_id = u.id AND status = 'present') as attendance_present,
         (SELECT COUNT(*) FROM attendance WHERE student_id = u.id) as attendance_total,
         (SELECT COUNT(*) FROM book_issues WHERE student_id = u.id AND status = 'issued') as books_issued,
@@ -25,6 +26,8 @@ $student = $conn->query("
     FROM users u
     JOIN students s ON u.id = s.user_id
     LEFT JOIN classes c ON s.class_id = c.id
+    LEFT JOIN bus_allocations ba ON s.bus_allocation_id = ba.id
+    LEFT JOIN buses b ON ba.bus_id = b.id
     WHERE u.id = $student_id AND u.role = 'student'
 ")->fetch_assoc();
 
@@ -58,86 +61,25 @@ $issued_books = $conn->query("
 ")->fetch_all(MYSQLI_ASSOC);
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>View Student - School ERP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-blue-700 text-white shadow-md">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-4">
-                    <img src="../../assets/img/logo/logo.png" alt="Logo" class="w-10 h-10">
-                    <div>
-                        <h1 class="text-2xl font-bold">School ERP System</h1>
-                        <p class="text-blue-200">Student Details</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative group">
-                        <div class="flex items-center space-x-2 cursor-pointer">
-                            <img src="../../assets/img/admin-avatar.jpg" alt="Admin" class="w-8 h-8 rounded-full border-2 border-white">
-                            <span><?= htmlspecialchars($_SESSION['user']['full_name']) ?></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container mx-auto px-6 py-8 flex">
-        <!-- Sidebar Navigation -->
-        <aside class="w-64 flex-shrink-0">
-            <nav class="bg-white rounded-lg shadow-md p-4 sticky top-4">
-                <ul class="space-y-2">
-                    <li>
-                        <a href="../../admin/dashboard.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50 text-blue-700">
-                            <i class="fas fa-arrow-left w-5"></i>
-                            <span>Back to Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="index.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50">
-                            <i class="fas fa-list w-5"></i>
-                            <span>Student List</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="edit.php?id=<?= $student_id ?>" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50">
-                            <i class="fas fa-edit w-5"></i>
-                            <span>Edit Student</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="delete.php?id=<?= $student_id ?>" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-red-50 text-red-600" onclick="return confirm('Are you sure you want to delete this student?')">
-                            <i class="fas fa-trash w-5"></i>
-                            <span>Delete Student</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
+<?php
+$pageTitle = 'Student Details';
+$activePage = 'students';
+include '../_layout.php';
+?>
         <!-- Main Content Area -->
         <main class="flex-1 ml-8">
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
                 <!-- Student Profile Header -->
                 <div class="bg-blue-600 text-white p-6">
                     <div class="flex items-center space-x-6">
-                        <div class="relative">
+                        <?php if (!empty($student['photo'])): ?>
+                            <img src="../../<?= htmlspecialchars($student['photo']) ?>" alt="Photo" class="w-24 h-24 rounded-full object-cover border">
+                        <?php else: ?>
                             <div class="w-24 h-24 rounded-full bg-blue-500 flex items-center justify-center text-4xl font-bold text-white">
                                 <?= substr($student['full_name'], 0, 1) ?>
                             </div>
-                            <span class="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold 
+                        <?php endif; ?>
+                        <span class="absolute bottom-0 right-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold 
                                 <?= $student['status'] == 'Active' ? 'bg-green-500' : ($student['status'] == 'Inactive' ? 'bg-yellow-500' : 'bg-blue-500') ?>">
                                 <?= substr($student['status'], 0, 1) ?>
                             </span>
@@ -318,6 +260,18 @@ $issued_books = $conn->query("
                                 <div class="sm:col-span-1">
                                     <dt class="text-sm font-medium text-gray-500">Account Created</dt>
                                     <dd class="mt-1 text-sm text-gray-900"><?= date('d M, Y', strtotime($student['created_at'])) ?></dd>
+                                </div>
+                                <div class="sm:col-span-1">
+                                    <dt class="text-sm font-medium text-gray-500">Bus Info</dt>
+                                    <dd class="mt-1 text-sm text-gray-900">
+                                        <?php if (!empty($student['bus_allocation_id'])): ?>
+                                            <span class="block font-medium">Bus: <?= htmlspecialchars($student['bus_number']) ?></span>
+                                            <span class="block text-xs text-gray-500">Route: <?= htmlspecialchars($student['route_name']) ?></span>
+                                            <span class="block text-xs text-gray-500">Stop: <?= htmlspecialchars($student['stop_name']) ?></span>
+                                        <?php else: ?>
+                                            <span class="text-xs text-gray-400">No Bus</span>
+                                        <?php endif; ?>
+                                    </dd>
                                 </div>
                             </dl>
                         </div>

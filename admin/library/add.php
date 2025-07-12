@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once '../config.php';
+require_once '../../config.php';
 
 if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header("Location: ../logout.php");
@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->bind_param("sssssiis", $title, $author, $isbn, $publisher, $edition, $quantity, $quantity, $category);
         if ($stmt->execute()) {
             $success = 'Book added successfully!';
-            header("Location: library.php");
+            header("Location: index.php");
             exit;
         } else {
             $error = 'Error adding book.';
@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
             </div>
             <div class="flex items-center space-x-4">
-                <a href="library.php" class="bg-white text-blue-700 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition">
+                <a href="index.php" class="bg-white text-blue-700 px-4 py-2 rounded-lg font-semibold hover:bg-blue-50 transition">
                     <i class="fas fa-arrow-left mr-1"></i>Back to Library
                 </a>
                 <span><?= htmlspecialchars($_SESSION['user']['full_name']) ?></span>
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="text" name="category" class="w-full px-3 py-2 border border-gray-300 rounded-md">
                 </div>
                 <div class="flex justify-end space-x-2">
-                    <a href="library.php" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</a>
+                    <a href="index.php" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Cancel</a>
                     <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Add Book</button>
                 </div>
             </form>

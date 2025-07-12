@@ -126,6 +126,12 @@ while ($row = $result->fetch_assoc()) {
                         </a>
                     </li>
                     <li>
+                        <a href="bus-id-cards/index.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50">
+                            <i class="fas fa-id-card w-5"></i>
+                            <span>Bus ID Cards</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="reports.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50">
                             <i class="fas fa-chart-bar w-5"></i>
                             <span>Reports</span>
@@ -223,6 +229,12 @@ while ($row = $result->fetch_assoc()) {
                             <i class="fas fa-user-plus text-orange-600 text-xl"></i>
                         </div>
                         <span class="text-sm font-medium text-center">Allocate Student</span>
+                    </a>
+                    <a href="bus-id-cards/index.php" class="flex flex-col items-center justify-center p-4 bg-red-50 rounded-lg hover:bg-red-100 transition">
+                        <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-2">
+                            <i class="fas fa-id-card text-red-600 text-xl"></i>
+                        </div>
+                        <span class="text-sm font-medium text-center">Bus ID Cards</span>
                     </a>
                 </div>
             </div>

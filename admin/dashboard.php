@@ -60,163 +60,11 @@ $result = $conn->query("SELECT * FROM notices ORDER BY created_at DESC LIMIT 3")
 while ($row = $result->fetch_assoc()) {
     $recent_notices[] = $row;
 }
+
+$pageTitle = 'Admin Dashboard';
+$activePage = 'dashboard';
+include '_layout.php';
 ?>
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - School ERP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .dashboard-card {
-            transition: all 0.3s ease;
-        }
-
-        .dashboard-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .sidebar-item {
-            transition: all 0.2s ease;
-        }
-
-        .sidebar-item:hover {
-            background-color: #f3f4f6;
-            border-left: 4px solid #3b82f6;
-        }
-    </style>
-</head>
-
-
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-blue-700 text-white shadow-md">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-4">
-                    <img src="../assets/img/logo/logo.png" alt="Logo" class="w-10 h-10">
-                    <div>
-                        <h1 class="text-2xl font-bold">School ERP System</h1>
-                        <p class="text-blue-200">Admin Dashboard</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative">
-                        <button id="userMenuButton" class="flex items-center space-x-2 cursor-pointer focus:outline-none">
-                            <img src="../assets/img/admin-avatar.jpg" alt="Admin" class="w-8 h-8 rounded-full border-2 border-white">
-                            <span class="text-sm"><?= htmlspecialchars($_SESSION['user']['full_name']) ?></span>
-                            <i class="fas fa-chevron-down text-sm"></i>
-                        </button>
-                        <div id="userMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-10 hidden">
-                            <a href="profile.php" class="block px-4 py-2 text-gray-800 hover:bg-blue-50"><i class="fas fa-user mr-2"></i>Profile</a>
-                            <a href="../logout.php" class="block px-4 py-2 text-gray-800 hover:bg-blue-50"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container mx-auto px-6 py-8 flex flex-col lg:flex-row gap-8">
-        <!-- Sidebar Navigation -->
-        <aside class="w-full lg:w-64 flex-shrink-0">
-            <nav class="bg-white rounded-lg shadow-md p-4 sticky top-4">
-                <ul class="space-y-2">
-                    <li>
-                        <a href="dashboard.php" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg bg-blue-50 text-blue-700">
-                            <i class="fas fa-tachometer-alt w-5"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="students/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-users w-5"></i>
-                            <span>Student Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="teachers/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-chalkboard-teacher w-5"></i>
-                            <span>Teacher Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="classes/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-school w-5"></i>
-                            <span>Class Management</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="subject/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-book w-5"></i>
-                            <span>Subject Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="attendance/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-calendar-check w-5"></i>
-                            <span>Attendance</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="timetable/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-clock w-5"></i>
-                            <span>Timetable</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="examinations/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-clipboard-list w-5"></i>
-                            <span>Examinations</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="fees/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-money-bill-wave w-5"></i>
-                            <span>Fee Management</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="library/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-book w-5"></i>
-                            <span>Library</span>
-                        </a>
-                    </li>
-
-                    <li>
-                        <a href="identity-cards/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-id-card w-5"></i>
-                            <span>Identity Cards</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="transport/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-bus w-5"></i>
-                            <span>Transport (Bus)</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="notices/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-bullhorn w-5"></i>
-                            <span>Notices</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="reports/" class="sidebar-item flex items-center space-x-3 p-3 rounded-lg">
-                            <i class="fas fa-chart-bar w-5"></i>
-                            <span>Reports</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
         <!-- Main Dashboard Content -->
         <main class="flex-1">
             <!-- Quick Stats -->
@@ -392,10 +240,10 @@ while ($row = $result->fetch_assoc()) {
                                     <div class="flex-shrink-0">
                                         <i class="<?= $activity['icon'] ?> text-blue-600 text-lg"></i>
                                     </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h3 class="font-semibold text-gray-800"><?= htmlspecialchars($activity['title']) ?></h3>
-                                        <p class="text-gray-600 text-sm"><?= htmlspecialchars($activity['description']) ?></p>
-                                        <p class="text-gray-500 text-xs mt-1"><?= date('M d, Y h:i A', strtotime($activity['time'])) ?></p>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 mb-1"><?= htmlspecialchars($activity['title']) ?></p>
+                                        <p class="text-gray-500 text-xs mb-1"><?= htmlspecialchars($activity['description']) ?></p>
+                                        <p class="text-gray-400 text-xs"><i class="fas fa-clock mr-1"></i><?= htmlspecialchars($activity['time']) ?></p>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -405,80 +253,31 @@ while ($row = $result->fetch_assoc()) {
 
                 <!-- Recent Notices -->
                 <div class="bg-white rounded-lg shadow-md p-6">
-                    <h2 class="text-xl font-bold mb-4 text-gray-800">Recent Notices</h2>
+                    <h2 class="text-xl font-bold mb-6 text-gray-800">Recent Notices</h2>
                     <div class="space-y-4">
                         <?php if (empty($recent_notices)): ?>
-                            <div class="text-center py-4">
-                                <i class="fas fa-bullhorn text-2xl text-gray-400 mb-2"></i>
-                                <p class="text-gray-500 text-sm">No notices posted yet.</p>
+                            <div class="text-center py-8">
+                                <i class="fas fa-bullhorn text-4xl text-gray-400 mb-4"></i>
+                                <p class="text-gray-500">No recent notices.</p>
                             </div>
                         <?php else: ?>
                             <?php foreach ($recent_notices as $notice): ?>
-                                <div class="border-l-4 border-blue-500 pl-4 py-2 hover:bg-gray-50 transition">
-                                    <h3 class="font-semibold text-gray-800 text-sm"><?= htmlspecialchars($notice['title']) ?></h3>
-                                    <p class="text-gray-600 text-xs"><?= htmlspecialchars(substr($notice['content'], 0, 80)) ?>...</p>
-                                    <div class="flex justify-between items-center mt-1">
-                                        <p class="text-gray-500 text-xs"><?= date('M d, Y', strtotime($notice['created_at'])) ?></p>
-                                        <a href="notices/view.php?id=<?= $notice['id'] ?>" class="text-blue-600 text-xs hover:underline">Read More</a>
+                                <div class="flex items-start space-x-3 p-3 border-l-4 border-orange-500 bg-orange-50 rounded-lg">
+                                    <div class="flex-shrink-0">
+                                        <i class="fas fa-bullhorn text-orange-600 text-lg"></i>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-gray-800 mb-1"><?= htmlspecialchars($notice['title']) ?></p>
+                                        <p class="text-gray-500 text-xs mb-1"><?= htmlspecialchars($notice['content']) ?></p>
+                                        <p class="text-gray-400 text-xs"><i class="fas fa-clock mr-1"></i><?= htmlspecialchars($notice['created_at']) ?></p>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
                         <?php endif; ?>
                     </div>
-                    <div class="mt-4 text-center">
-                        <a href="notices/" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                            View All Notices <i class="fas fa-arrow-right ml-1"></i>
-                        </a>
-                    </div>
                 </div>
             </div>
         </main>
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-gray-100 border-t border-gray-200 py-6 mt-8">
-        <div class="container mx-auto px-6">
-            <div class="flex flex-col md:flex-row justify-between items-center">
-                <div class="mb-4 md:mb-0">
-                    <p class="text-gray-600">© 2025 School ERP System. All rights reserved.</p>
-                </div>
-                <div class="flex space-x-4">
-                    <a href="#" class="text-gray-600 hover:text-blue-600"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" class="text-gray-600 hover:text-blue-400"><i class="fab fa-twitter"></i></a>
-                    <a href="#" class="text-gray-600 hover:text-red-600"><i class="fab fa-youtube"></i></a>
-                    <a href="#" class="text-gray-600 hover:text-gray-900"><i class="fab fa-github"></i></a>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const userBtn = document.getElementById('userMenuButton');
-            const userMenu = document.getElementById('userMenu');
-
-            // Toggle menu on click
-            userBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                userMenu.classList.toggle('hidden');
-            });
-
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!userMenu.contains(e.target) && !userBtn.contains(e.target)) {
-                    userMenu.classList.add('hidden');
-                }
-            });
-
-            // Close on Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    userMenu.classList.add('hidden');
-                }
-            });
-        });
-    </script>
 </body>
-
 </html>

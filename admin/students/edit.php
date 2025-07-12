@@ -70,69 +70,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 ?>
 
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Student - School ERP</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-blue-700 text-white shadow-md">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex justify-between items-center">
-                <div class="flex items-center space-x-4">
-                    <img src="../../assets/img/logo/logo.png" alt="Logo" class="w-10 h-10">
-                    <div>
-                        <h1 class="text-2xl font-bold">School ERP System</h1>
-                        <p class="text-blue-200">Edit Student</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <div class="relative group">
-                        <div class="flex items-center space-x-2 cursor-pointer">
-                            <img src="../../assets/img/admin-avatar.jpg" alt="Admin" class="w-8 h-8 rounded-full border-2 border-white">
-                            <span><?= htmlspecialchars($_SESSION['user']['full_name']) ?></span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Main Content -->
-    <div class="container mx-auto px-6 py-8 flex">
-        <!-- Sidebar Navigation -->
-        <aside class="w-64 flex-shrink-0">
-            <nav class="bg-white rounded-lg shadow-md p-4 sticky top-4">
-                <ul class="space-y-2">
-                    <li>
-                        <a href="../../admin/dashboard.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50 text-blue-700">
-                            <i class="fas fa-arrow-left w-5"></i>
-                            <span>Back to Dashboard</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="index.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50">
-                            <i class="fas fa-list w-5"></i>
-                            <span>Student List</span>
-                        </a>
-                    </li>
-                    <li>
-                        <a href="create.php" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-blue-50">
-                            <i class="fas fa-user-plus w-5"></i>
-                            <span>Add New Student</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
+<?php
+$pageTitle = 'Edit Student';
+$activePage = 'students';
+include '../_layout.php';
+?>
         <!-- Main Content Area -->
         <main class="flex-1 ml-8">
             <div class="bg-white rounded-lg shadow-md p-6">
