@@ -17,7 +17,7 @@ if ($mode === 'student') {
     $student = $conn->query("
         SELECT u.full_name, u.admission_number, u.phone, u.email, 
                s.parent_name, s.dob, s.photo, s.address, s.gender, s.blood_group, 
-               s.roll_number, s.admission_date, c.class_name, c.section
+               s.roll_number, s.admission_date, c.class_name, c.section, s.bus_allocation_id
         FROM users u 
         JOIN students s ON u.id = s.user_id 
         LEFT JOIN classes c ON s.class_id = c.id
@@ -42,6 +42,22 @@ if ($mode === 'student') {
     $class_name = ($student['class_name'] ?? '') . ' ' . ($student['section'] ?? '');
     $admission_date = $student['admission_date'] ? date('d/m/Y', strtotime($student['admission_date'])) : '';
     $signature = $_POST['signature'] ?? '';
+
+    // Fetch bus allocation info if exists
+    $bus_number = $stop_name = '';
+    if (!empty($student['bus_allocation_id'])) {
+        $bus = $conn->query("
+            SELECT b.bus_number, ba.stop_name
+            FROM bus_allocations ba
+            JOIN buses b ON ba.bus_id = b.id
+            WHERE ba.id = " . intval($student['bus_allocation_id']) . " LIMIT 1
+        ")->fetch_assoc();
+        if ($bus) {
+            $bus_number = $bus['bus_number'];
+            $stop_name = $bus['stop_name'];
+        }
+    }
+    $emergency_number = '+91-9999999999'; // Set your emergency number here
     
     // Handle photo
     $targetPath = '';
@@ -178,6 +194,13 @@ if ($mode === 'student') {
             <p>• Valid for academic year 2024-2025</p>
             <p>• Must be carried daily to school</p>
             <p>• Report loss immediately to office</p>
+        </div>
+        <!-- Bus Info Section -->
+        <div class="mb-3 text-[11px] leading-4 bg-blue-50 p-2 rounded">
+            <p class="font-bold text-blue-600 mb-1">Bus Information:</p>
+            <p><span class="font-bold">Bus Number:</span> <?= !empty($bus_number) ? htmlspecialchars($bus_number) : '<span class="text-gray-400">Not Allocated</span>' ?></p>
+            <p><span class="font-bold">Stop Name:</span> <?= !empty($stop_name) ? htmlspecialchars($stop_name) : '<span class="text-gray-400">Not Allocated</span>' ?></p>
+            <p><span class="font-bold">Emergency No.:</span> <?= htmlspecialchars($emergency_number) ?></p>
         </div>
 
         <!-- Signature and Authority -->

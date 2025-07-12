@@ -220,6 +220,12 @@ include '_layout.php';
                         </div>
                         <span class="text-sm font-medium text-center">Add Bus</span>
                     </a>
+                    <a href="identity-cards/" class="flex flex-col items-center justify-center p-4 bg-pink-50 rounded-lg hover:bg-pink-100 transition">
+                        <div class="w-12 h-12 bg-pink-100 rounded-full flex items-center justify-center mb-2">
+                            <i class="fas fa-id-card text-pink-600 text-xl"></i>
+                        </div>
+                        <span class="text-sm font-medium text-center">Student ID Card</span>
+                    </a>
                 </div>
             </div>
 

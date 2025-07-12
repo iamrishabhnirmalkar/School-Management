@@ -12,6 +12,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'add':
+                // Validate required fields with specific error messages
+                $missing_fields = [];
+                
+                if (!isset($_POST['student_id']) || empty($_POST['student_id'])) {
+                    $missing_fields[] = "Student";
+                }
+                if (!isset($_POST['bus_id']) || empty($_POST['bus_id'])) {
+                    $missing_fields[] = "Vehicle";
+                }
+                if (!isset($_POST['stop_name']) || empty($_POST['stop_name'])) {
+                    $missing_fields[] = "Stop Name";
+                }
+                if (!isset($_POST['pickup_time']) || empty($_POST['pickup_time'])) {
+                    $missing_fields[] = "Pickup Time";
+                }
+                if (!isset($_POST['drop_time']) || empty($_POST['drop_time'])) {
+                    $missing_fields[] = "Drop Time";
+                }
+                if (!isset($_POST['monthly_fee']) || empty($_POST['monthly_fee'])) {
+                    $missing_fields[] = "Monthly Fee";
+                }
+                if (!isset($_POST['academic_year']) || empty($_POST['academic_year'])) {
+                    $missing_fields[] = "Academic Year";
+                }
+                
+                if (!empty($missing_fields)) {
+                    $_SESSION['error'] = "Missing required fields: " . implode(", ", $missing_fields);
+                    header("Location: allocations.php");
+                    exit;
+                }
+
                 $student_id = $_POST['student_id'];
                 $bus_id = $_POST['bus_id'];
                 $stop_name = $_POST['stop_name'];
@@ -36,6 +67,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             case 'edit':
+                // Validate required fields
+                if (!isset($_POST['allocation_id']) || empty($_POST['allocation_id']) ||
+                    !isset($_POST['stop_name']) || empty($_POST['stop_name']) ||
+                    !isset($_POST['pickup_time']) || empty($_POST['pickup_time']) ||
+                    !isset($_POST['drop_time']) || empty($_POST['drop_time']) ||
+                    !isset($_POST['monthly_fee']) || empty($_POST['monthly_fee']) ||
+                    !isset($_POST['payment_status']) || empty($_POST['payment_status'])) {
+                    $_SESSION['error'] = "All fields are required!";
+                    header("Location: allocations.php");
+                    exit;
+                }
+
                 $allocation_id = $_POST['allocation_id'];
                 $stop_name = $_POST['stop_name'];
                 $pickup_time = $_POST['pickup_time'];
@@ -54,6 +97,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 break;
 
             case 'delete':
+                // Validate required fields
+                if (!isset($_POST['allocation_id']) || empty($_POST['allocation_id'])) {
+                    $_SESSION['error'] = "Allocation ID is required!";
+                    header("Location: allocations.php");
+                    exit;
+                }
+
                 $allocation_id = $_POST['allocation_id'];
                 
                 // Get student_id before deleting
@@ -419,8 +469,8 @@ $unallocated_students = $conn->query("
                                 <div class="border border-gray-200 rounded-lg p-4">
                                     <div class="flex justify-between items-start">
                                         <div>
-                                            <h3 class="font-medium text-gray-900"><?= htmlspecialchars($student['full_name']) ?></h3>
-                                            <p class="text-sm text-gray-500"><?= htmlspecialchars($student['admission_number']) ?></p>
+                                            <h3 class="font-medium text-gray-900"><?= htmlspecialchars($student['full_name'] ?? 'N/A') ?></h3>
+                                            <p class="text-sm text-gray-500"><?= htmlspecialchars($student['admission_number'] ?? 'N/A') ?></p>
                                             <p class="text-xs text-gray-400">
                                                 <?= htmlspecialchars($student['class_name'] ?? 'N/A') ?> <?= htmlspecialchars($student['section'] ?? '') ?>
                                             </p>
@@ -458,7 +508,7 @@ $unallocated_students = $conn->query("
                                 <option value="">Select Student</option>
                                 <?php foreach ($unallocated_students as $student): ?>
                                     <option value="<?= $student['id'] ?>">
-                                        <?= htmlspecialchars($student['full_name']) ?> (<?= htmlspecialchars($student['admission_number']) ?>)
+                                        <?= htmlspecialchars($student['full_name'] ?? 'N/A') ?> (<?= htmlspecialchars($student['admission_number'] ?? 'N/A') ?>)
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -578,7 +628,7 @@ $unallocated_students = $conn->query("
             
             if (studentData) {
                 document.getElementById('studentId').value = studentData.id;
-                document.getElementById('studentId').disabled = true;
+                document.getElementById('studentId').disabled = false; // Keep enabled for form submission
             } else {
                 document.getElementById('studentId').disabled = false;
             }
