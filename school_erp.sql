@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 11, 2025 at 06:01 PM
+-- Generation Time: Jul 13, 2025 at 05:55 AM
 -- Server version: 8.0.42-0ubuntu0.24.04.1
 -- PHP Version: 8.3.6
 
@@ -39,7 +39,8 @@ CREATE TABLE `activity_log` (
 --
 
 INSERT INTO `activity_log` (`id`, `user_id`, `action`, `created_at`) VALUES
-(1, 1, 'Promoted 2 students from Class 1 A to Class 2 B', '2025-07-07 21:17:59');
+(1, 1, 'Promoted 2 students from Class 1 A to Class 2 B', '2025-07-07 21:17:59'),
+(2, 1, 'Promoted 2 students from Class 1  to Class 2 B', '2025-07-12 16:57:32');
 
 -- --------------------------------------------------------
 
@@ -104,6 +105,13 @@ CREATE TABLE `buses` (
   `current_location` varchar(255) DEFAULT NULL,
   `last_updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `buses`
+--
+
+INSERT INTO `buses` (`id`, `bus_number`, `route_name`, `driver_name`, `driver_phone`, `capacity`, `stops`, `vehicle_type`, `registration_number`, `model`, `year`, `tracking_device_id`, `tracking_enabled`, `last_location`, `last_update`, `current_location`, `last_updated`) VALUES
+(1, 'CG 04 HX 1424', 'Hiran', 'salmon bhai', '0123012301', 200, '', 'bus', '0123012301', '', 0, '', 0, NULL, NULL, NULL, '2025-07-12 19:38:46');
 
 -- --------------------------------------------------------
 
@@ -216,12 +224,31 @@ CREATE TABLE `exam_subjects` (
 CREATE TABLE `fees` (
   `id` int NOT NULL,
   `student_id` int NOT NULL,
+  `class_id` int DEFAULT NULL,
   `fee_type` varchar(50) NOT NULL,
   `amount` decimal(10,2) NOT NULL,
   `due_date` date NOT NULL,
   `paid_date` date DEFAULT NULL,
   `status` enum('paid','unpaid','partial') DEFAULT 'unpaid',
   `remarks` text
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `fee_payments`
+--
+
+CREATE TABLE `fee_payments` (
+  `id` int NOT NULL,
+  `fee_id` int NOT NULL,
+  `student_id` int NOT NULL,
+  `amount_paid` decimal(10,2) NOT NULL,
+  `payment_method` varchar(50) NOT NULL,
+  `payment_date` date NOT NULL,
+  `collected_by` int NOT NULL,
+  `remarks` text,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
@@ -370,11 +397,9 @@ INSERT INTO `students` (`user_id`, `class_id`, `roll_number`, `admission_date`, 
 (4, 2, '1212', '2025-07-07', 'Female', 'A+', 'asd', '988008800', 'asd', '2025-07-02', 'Active', NULL, 0, NULL, NULL, NULL, '2023-2024', NULL),
 (201, 1, 'A001', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active', NULL, 0, NULL, NULL, NULL, '2023-2024', NULL),
 (202, 1, 'A002', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active', NULL, 0, NULL, NULL, NULL, '2023-2024', NULL),
-(203, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active', NULL, 0, NULL, NULL, NULL, '2024-2025', NULL),
-(204, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active', NULL, 0, NULL, NULL, NULL, '2024-2025', NULL),
-(205, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active', NULL, 0, NULL, NULL, NULL, '2024-2025', NULL),
-(206, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active', NULL, 0, NULL, NULL, NULL, '2024-2025', NULL),
-(207, 5, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active', NULL, 0, NULL, NULL, NULL, '2024-2025', NULL);
+(203, 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active', NULL, 0, NULL, NULL, NULL, '2024-2025', NULL),
+(205, 2, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Active', NULL, 0, NULL, NULL, NULL, '2024-2025', NULL),
+(212, 1, '', '2025-07-12', 'Male', '', '', '', 'asd', '2025-07-05', 'Active', NULL, 0, NULL, NULL, NULL, '2023-2024', NULL);
 
 -- --------------------------------------------------------
 
@@ -528,6 +553,51 @@ CREATE TABLE `timetable` (
   `room_number` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+--
+-- Dumping data for table `timetable`
+--
+
+INSERT INTO `timetable` (`id`, `class_id`, `subject_id`, `teacher_id`, `day_of_week`, `start_time`, `end_time`, `room_number`) VALUES
+(1, 5, 3, 101, 'Monday', '02:02:00', '02:05:00', '10');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `time_slots`
+--
+
+CREATE TABLE `time_slots` (
+  `id` int NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `label` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `time_slots`
+--
+
+INSERT INTO `time_slots` (`id`, `start_time`, `end_time`, `label`, `created_at`, `updated_at`) VALUES
+(11, '08:00:00', '08:45:00', 'Period 1', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(12, '08:45:00', '08:50:00', 'Break', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(13, '08:50:00', '09:35:00', 'Period 2', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(14, '09:35:00', '09:40:00', 'Break', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(15, '09:40:00', '10:25:00', 'Period 3', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(16, '10:25:00', '10:30:00', 'Break', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(17, '10:30:00', '11:15:00', 'Period 4', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(18, '11:15:00', '11:20:00', 'Break', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(19, '11:20:00', '12:05:00', 'Period 5', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(20, '12:05:00', '12:45:00', 'Lunch Break', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(21, '12:45:00', '13:30:00', 'Period 6', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(22, '13:30:00', '13:35:00', 'Break', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(23, '13:35:00', '14:20:00', 'Period 7', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(24, '14:20:00', '14:25:00', 'Break', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(25, '14:25:00', '15:10:00', 'Period 8', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(26, '15:10:00', '15:15:00', 'Break', '2025-07-12 21:25:38', '2025-07-12 21:25:38'),
+(27, '15:15:00', '16:00:00', 'Period 9', '2025-07-12 21:25:38', '2025-07-12 21:25:38');
+
 -- --------------------------------------------------------
 
 --
@@ -560,10 +630,8 @@ INSERT INTO `users` (`id`, `admission_number`, `login_id`, `role`, `full_name`, 
 (201, NULL, 'stu1', 'student', 'Student One', 'student1@example.com', NULL, '2025-07-09 17:18:16', '2025-07-09 17:18:16'),
 (202, NULL, 'stu2', 'student', 'Student Two', 'student2@example.com', NULL, '2025-07-09 17:18:16', '2025-07-09 17:18:16'),
 (203, NULL, 'stu101', 'student', 'Student A1', NULL, NULL, '2025-07-09 18:28:04', '2025-07-09 18:28:04'),
-(204, NULL, 'stu102', 'student', 'Student A2', NULL, NULL, '2025-07-09 18:28:04', '2025-07-09 18:28:04'),
 (205, NULL, 'stu103', 'student', 'Student A3', NULL, NULL, '2025-07-09 18:28:04', '2025-07-09 18:28:04'),
-(206, NULL, 'stu104', 'student', 'Student A4', NULL, NULL, '2025-07-09 18:28:04', '2025-07-09 18:28:04'),
-(207, NULL, 'stu105', 'student', 'Student A5', NULL, NULL, '2025-07-09 18:28:04', '2025-07-09 18:28:04');
+(212, 'ADM1111', 'ADM1111', 'student', 'Palak Dadlani', '', '07803002963', '2025-07-12 16:53:35', '2025-07-12 16:53:35');
 
 --
 -- Indexes for dumped tables
@@ -640,6 +708,15 @@ ALTER TABLE `exam_subjects`
 ALTER TABLE `fees`
   ADD PRIMARY KEY (`id`),
   ADD KEY `student_id` (`student_id`);
+
+--
+-- Indexes for table `fee_payments`
+--
+ALTER TABLE `fee_payments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_fee_payments_fee` (`fee_id`),
+  ADD KEY `fk_fee_payments_student` (`student_id`),
+  ADD KEY `fk_fee_payments_collector` (`collected_by`);
 
 --
 -- Indexes for table `homework`
@@ -758,6 +835,12 @@ ALTER TABLE `timetable`
   ADD KEY `teacher_id` (`teacher_id`);
 
 --
+-- Indexes for table `time_slots`
+--
+ALTER TABLE `time_slots`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -773,7 +856,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `activity_log`
 --
 ALTER TABLE `activity_log`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `attendance`
@@ -785,13 +868,13 @@ ALTER TABLE `attendance`
 -- AUTO_INCREMENT for table `book_issues`
 --
 ALTER TABLE `book_issues`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `buses`
 --
 ALTER TABLE `buses`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `bus_allocations`
@@ -830,6 +913,12 @@ ALTER TABLE `fees`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `fee_payments`
+--
+ALTER TABLE `fee_payments`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `homework`
 --
 ALTER TABLE `homework`
@@ -851,13 +940,13 @@ ALTER TABLE `id_card_print_logs`
 -- AUTO_INCREMENT for table `library_books`
 --
 ALTER TABLE `library_books`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `notices`
 --
 ALTER TABLE `notices`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `notice_read_status`
@@ -905,13 +994,19 @@ ALTER TABLE `teacher_subjects`
 -- AUTO_INCREMENT for table `timetable`
 --
 ALTER TABLE `timetable`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `time_slots`
+--
+ALTER TABLE `time_slots`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=210;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=213;
 
 --
 -- Constraints for dumped tables
@@ -969,6 +1064,14 @@ ALTER TABLE `exam_subjects`
 --
 ALTER TABLE `fees`
   ADD CONSTRAINT `fees_ibfk_1` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `fee_payments`
+--
+ALTER TABLE `fee_payments`
+  ADD CONSTRAINT `fk_fee_payments_collector` FOREIGN KEY (`collected_by`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_fee_payments_fee` FOREIGN KEY (`fee_id`) REFERENCES `fees` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_fee_payments_student` FOREIGN KEY (`student_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `homework`
