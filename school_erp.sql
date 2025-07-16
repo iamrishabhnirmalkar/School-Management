@@ -18,12 +18,6 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `school_erp`
---
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `activity_log`
 --
 
@@ -32,7 +26,7 @@ CREATE TABLE `activity_log` (
   `user_id` int NOT NULL,
   `action` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 --
 -- Dumping data for table `activity_log`
@@ -54,7 +48,7 @@ CREATE TABLE `attendance` (
   `date` date NOT NULL,
   `status` enum('present','absent','late') NOT NULL,
   `remarks` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `attendance`
@@ -78,7 +72,7 @@ CREATE TABLE `book_issues` (
   `return_date` date DEFAULT NULL,
   `due_date` date NOT NULL,
   `status` enum('issued','returned','overdue') DEFAULT 'issued'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -104,7 +98,7 @@ CREATE TABLE `buses` (
   `last_update` timestamp NULL DEFAULT NULL,
   `current_location` varchar(255) DEFAULT NULL,
   `last_updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `buses`
@@ -129,7 +123,7 @@ CREATE TABLE `bus_allocations` (
   `monthly_fee` decimal(10,2) DEFAULT '0.00',
   `payment_status` enum('paid','unpaid') DEFAULT 'unpaid',
   `academic_year` varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -143,7 +137,7 @@ CREATE TABLE `classes` (
   `section` varchar(20) DEFAULT NULL,
   `class_teacher_id` int DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `classes`
@@ -175,7 +169,7 @@ CREATE TABLE `examinations` (
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
   `description` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `examinations`
@@ -197,7 +191,7 @@ CREATE TABLE `exam_results` (
   `marks_obtained` decimal(5,2) NOT NULL,
   `grade` varchar(5) DEFAULT NULL,
   `remarks` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -213,7 +207,7 @@ CREATE TABLE `exam_subjects` (
   `pass_marks` int NOT NULL,
   `exam_date` date NOT NULL,
   `exam_time` time NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -231,7 +225,7 @@ CREATE TABLE `fees` (
   `paid_date` date DEFAULT NULL,
   `status` enum('paid','unpaid','partial') DEFAULT 'unpaid',
   `remarks` text
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -249,7 +243,7 @@ CREATE TABLE `fee_payments` (
   `collected_by` int NOT NULL,
   `remarks` text,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -267,7 +261,7 @@ CREATE TABLE `homework` (
   `due_date` date NOT NULL,
   `file_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -283,7 +277,7 @@ CREATE TABLE `id_card_designs` (
   `layout_json` text,
   `is_default` tinyint(1) DEFAULT '0',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `id_card_designs`
@@ -306,7 +300,7 @@ CREATE TABLE `id_card_print_logs` (
   `printed_by` int NOT NULL,
   `printed_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `template_id` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -324,7 +318,7 @@ CREATE TABLE `library_books` (
   `quantity` int NOT NULL DEFAULT '1',
   `available` int NOT NULL DEFAULT '1',
   `category` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -338,7 +332,7 @@ CREATE TABLE `notices` (
   `content` text NOT NULL,
   `created_by` int NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `notices`
@@ -359,7 +353,7 @@ CREATE TABLE `notice_read_status` (
   `notice_id` int NOT NULL,
   `is_read` tinyint(1) DEFAULT '0',
   `read_at` timestamp NULL DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -386,7 +380,7 @@ CREATE TABLE `students` (
   `id_card_valid_until` date DEFAULT NULL,
   `current_year` varchar(20) DEFAULT '2023-2024',
   `bus_allocation_id` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `students`
@@ -415,7 +409,7 @@ CREATE TABLE `student_documents` (
   `file_path` varchar(255) NOT NULL,
   `issued_date` date NOT NULL,
   `issued_by` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -433,7 +427,7 @@ CREATE TABLE `study_materials` (
   `file_path` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `type` enum('notes','question_paper','sample_paper','other') COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -447,7 +441,7 @@ CREATE TABLE `subjects` (
   `subject_code` varchar(20) DEFAULT NULL,
   `class_id` int DEFAULT NULL,
   `teacher_id` int DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `subjects`
@@ -483,7 +477,7 @@ CREATE TABLE `teachers` (
   `id_card_number` varchar(20) DEFAULT NULL,
   `id_card_issue_date` date DEFAULT NULL,
   `id_card_valid_until` date DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `teachers`
@@ -505,7 +499,7 @@ CREATE TABLE `teacher_attendance` (
   `date` date NOT NULL,
   `status` enum('present','absent','leave') COLLATE utf8mb4_unicode_ci NOT NULL,
   `remarks` text COLLATE utf8mb4_unicode_ci
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -520,7 +514,7 @@ CREATE TABLE `teacher_leaves` (
   `reason` text COLLATE utf8mb4_unicode_ci NOT NULL,
   `status` enum('pending','approved','rejected') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -534,7 +528,7 @@ CREATE TABLE `teacher_subjects` (
   `subject_id` int NOT NULL,
   `class_id` int NOT NULL,
   `academic_year` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 -- --------------------------------------------------------
 
@@ -551,7 +545,7 @@ CREATE TABLE `timetable` (
   `start_time` time NOT NULL,
   `end_time` time NOT NULL,
   `room_number` varchar(20) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `timetable`
@@ -573,7 +567,7 @@ CREATE TABLE `time_slots` (
   `label` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+);
 
 --
 -- Dumping data for table `time_slots`
@@ -614,7 +608,7 @@ CREATE TABLE `users` (
   `phone` varchar(20) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+);
 
 --
 -- Dumping data for table `users`
