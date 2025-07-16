@@ -71,4 +71,4 @@ UserId: admin
 
 ## 🙋‍♂️ Support
 
-For any queries or support, feel free to contact the project maintainer.
+For any queries or support, feel free to contact Me.
